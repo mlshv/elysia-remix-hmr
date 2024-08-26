@@ -1,32 +1,20 @@
 import { Elysia, NotFoundError } from "elysia";
-import { staticPlugin } from "@elysiajs/static";
-import { createRequestHandler, initialBuild } from "./remix-elysia";
-import { broadcastDevReady } from "@remix-run/node";
+import { createRemixPlugin } from "./remix-elysia";
+
+const remixPlugin = await createRemixPlugin();
 
 const app = new Elysia()
-  .get("/api", () => "Hello Elysia")
-  .onStart(async () => {
-    if (process.env.NODE_ENV === "development") {
-      broadcastDevReady(initialBuild);
-    }
-  })
-  .onError(async (context) => {
-    if (context.error instanceof NotFoundError) {
-      const handler = createRequestHandler();
+  .onError(({ error }: { error: unknown }) => {
+    if (!(error instanceof NotFoundError)) {
+      if (error instanceof Error) {
+        return new Response(error.toString());
+      }
 
-      return handler(context.request);
+      return new Response(null, { status: 500 });
     }
   })
-  // Serve public files
-  .use(
-    staticPlugin({
-      prefix: "/",
-      directive: "immutable",
-      maxAge: 31556952000,
-      alwaysStatic: false,
-      noCache: true, // see https://github.com/elysiajs/elysia/issues/739
-    })
-  )
+  .get("/api", () => "Hello Elysia")
+  .use(remixPlugin)
   .listen(3000);
 
 console.log(

@@ -1,5 +1,8 @@
-# Attempt to make Elysia run with Bun and mount Remix in a subpath
+# Elysia Remix plugin implementation with HMR support
 
-It seems to be working fine although we need to change the `react-dom/server` import on the **entry.server.tsx** to `react-dom/server.node`
+An example of how to run Elysia with Remix and HMR support. No Vite needed, just pure Bun.
 
-AND be prepare to fight against the [broken links](https://github.com/remix-run/remix/discussions/2891)
+Forked from https://github.com/wladpaiva/elysia-remix
+
+Took some code from https://github.com/kravetsone/elysia-remix
+
