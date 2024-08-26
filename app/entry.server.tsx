@@ -3,7 +3,7 @@ import { PassThrough } from "node:stream";
 import type { AppLoadContext, EntryContext } from "@remix-run/node";
 import { createReadableStreamFromReadable } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
-import isbot from "isbot";
+import { isbot } from "isbot";
 // @ts-expect-error - bun throws an error if you try to import react-dom/server
 import { renderToPipeableStream } from "react-dom/server.node";
 
@@ -18,17 +18,17 @@ export default function handleRequest(
 ) {
   return isbot(request.headers.get("user-agent"))
     ? handleBotRequest(
-      request,
-      responseStatusCode,
-      responseHeaders,
-      remixContext
-    )
+        request,
+        responseStatusCode,
+        responseHeaders,
+        remixContext
+      )
     : handleBrowserRequest(
-      request,
-      responseStatusCode,
-      responseHeaders,
-      remixContext
-    );
+        request,
+        responseStatusCode,
+        responseHeaders,
+        remixContext
+      );
 }
 
 function handleBotRequest(

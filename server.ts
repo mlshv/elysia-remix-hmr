@@ -1,20 +1,30 @@
-import { createRequestHandler } from "./remix-elysia";
-import { Elysia } from "elysia";
+import { Elysia, NotFoundError } from "elysia";
 import { staticPlugin } from "@elysiajs/static";
-
-// notice that the result of `remix build` is "just a module"
-import * as build from "./build/index.js";
+import { createRequestHandler, initialBuild } from "./remix-elysia";
+import { broadcastDevReady } from "@remix-run/node";
 
 const app = new Elysia()
   .get("/api", () => "Hello Elysia")
+  .onStart(async () => {
+    if (process.env.NODE_ENV === "development") {
+      broadcastDevReady(initialBuild);
+    }
+  })
+  .onError(async (context) => {
+    if (context.error instanceof NotFoundError) {
+      const handler = createRequestHandler();
+
+      return handler(context.request);
+    }
+  })
   // Serve public files
-  .use(staticPlugin({ prefix: "/" }))
-  // Serve remix routes
-  .mount(
-    "/",
-    createRequestHandler({
-      // @ts-expect-error
-      build,
+  .use(
+    staticPlugin({
+      prefix: "/",
+      directive: "immutable",
+      maxAge: 31556952000,
+      alwaysStatic: false,
+      noCache: true, // see https://github.com/elysiajs/elysia/issues/739
     })
   )
   .listen(3000);
